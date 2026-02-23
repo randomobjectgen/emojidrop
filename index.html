@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EmojiDrop — Random Object & Emoji Generator</title>
+  <meta name="description" content="A random object name and emoji generator for games, learning, art, and creative idea generation." />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ===================== CSS VARIABLES ===================== */
+    :root {
+      --g0: #0a1a0f;
+      --g1: #0f2a17;
+      --g2: #143520;
+      --g3: #1a4428;
+      --g4: #21572f;
+      --g5: #2d7a42;
+      --g6: #3d9e57;
+      --g7: #52c46e;
+      --g8: #7dd98f;
+      --g9: #b3edbe;
+      --ga: #d6f5dc;
+      --gb: #ecfbef;
+
+      --accent: #52c46e;
+      --accent-dim: #2d7a42;
+      --accent-glow: rgba(82,196,110,0.25);
+      --accent-glow2: rgba(82,196,110,0.08);
+
+      --bg: #f0faf2;
+      --bg2: #e2f5e6;
+      --bg3: #ffffff;
+      --surface: #ffffff;
+      --surface2: #f5fdf7;
+      --border: #c2e8cb;
+      --border2: #a8d9b4;
+      --text: #0d2415;
+      --text2: #2a5236;
+      --text3: #4a7a5a;
+      --text-muted: #6fa07f;
+      --shadow: rgba(20,80,40,0.10);
+      --shadow2: rgba(20,80,40,0.18);
+      --radius: 16px;
+      --radius-sm: 10px;
+      --radius-lg: 24px;
+      --transition: 0.3s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    [data-theme="dark"] {
+      --bg: #071210;
+      --bg2: #0d1f17;
+      --bg3: #0f2419;
+      --surface: #132b1d;
+      --surface2: #172f20;
+      --border: #1e4a2e;
+      --border2: #2a5e3a;
+      --text: #d6f5dc;
+      --text2: #9fdaad;
+      --text3: #6fb87d;
+      --text-muted: #4a8a5c;
+      --shadow: rgba(0,0,0,0.4);
+      --shadow2: rgba(0,0,0,0.6);
+      --accent-glow: rgba(82,196,110,0.20);
+      --accent-glow2: rgba(82,196,110,0.06);
+    }
+
+    /* ===================== RESET ===================== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 16px;
+      line-height: 1.7;
+      transition: background var(--transition), color var(--transition);
+      min-height: 100vh;
+    }
+    a {
+        color: var(--g6);
+    }
+
+    /* ===================== BACKGROUND TEXTURE ===================== */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 10% 10%, rgba(82,196,110,0.06) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 80% at 90% 80%, rgba(45,122,66,0.07) 0%, transparent 55%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ===================== STICKY NAV ===================== */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(240,250,242,0.85);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+      transition: background var(--transition), border-color var(--transition);
+    }
+    [data-theme="dark"] nav {
+      background: rgba(7,18,16,0.88);
+    }
+    .nav-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      height: 60px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .nav-inner::-webkit-scrollbar { display: none; }
+    .nav-logo {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.2rem;
+      color: var(--accent);
+      white-space: nowrap;
+      margin-right: 12px;
+      letter-spacing: -0.02em;
+      flex-shrink: 0;
+    }
+    .nav-link {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--text3);
+      text-decoration: none;
+      white-space: nowrap;
+      padding: 6px 12px;
+      border-radius: 8px;
+      transition: background var(--transition), color var(--transition);
+      flex-shrink: 0;
+    }
+    .nav-link:hover {
+      background: var(--accent-glow);
+      color: var(--accent);
+    }
+    .nav-spacer { flex: 1; }
+    .dark-toggle {
+      flex-shrink: 0;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 50px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      font-family: 'Syne', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text2);
+      transition: all var(--transition);
+    }
+    .dark-toggle:hover { border-color: var(--accent); color: var(--accent); }
+    .dark-toggle .icon { font-size: 1rem; }
+
+    /* ===================== LAYOUT ===================== */
+    main {
+      position: relative;
+      z-index: 1;
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+
+    /* ===================== HERO ===================== */
+    .hero {
+      text-align: center;
+      padding: 48px 0 40px;
+    }
+    .hero-badge {
+      display: inline-block;
+      background: var(--accent-glow);
+      border: 1px solid var(--accent);
+      color: var(--g5);
+      font-family: 'Syne', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 4px 16px;
+      border-radius: 50px;
+      margin-bottom: 20px;
+    }
+    [data-theme="dark"] .hero-badge { color: var(--g8); }
+    .hero h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(2.4rem, 6vw, 3.8rem);
+      line-height: 1.1;
+      color: var(--text);
+      letter-spacing: -0.03em;
+      margin-bottom: 16px;
+    }
+    .hero h1 em {
+      font-style: italic;
+      color: var(--accent);
+    }
+    .hero-sub {
+      font-size: 1.05rem;
+      color: var(--text3);
+      max-width: 560px;
+      margin: 0 auto 0;
+      line-height: 1.65;
+    }
+
+    /* ===================== GENERATOR TOOL ===================== */
+    .tool-card {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 36px 36px 32px;
+      box-shadow: 0 8px 40px var(--shadow), 0 2px 8px var(--shadow2);
+      margin: 32px 0 48px;
+      position: relative;
+      overflow: hidden;
+      transition: background var(--transition), border-color var(--transition), box-shadow var(--transition);
+    }
+    .tool-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--g5), var(--accent), var(--g8));
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    }
+    .tool-output {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      min-height: 130px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 24px;
+      transition: background var(--transition), border-color var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+    .tool-output::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at center, var(--accent-glow2), transparent 70%);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.4s;
+    }
+    .tool-output.glow::after { opacity: 1; }
+    .output-emoji {
+      font-size: 3.5rem;
+      line-height: 1;
+      transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1), opacity 0.25s;
+    }
+    .output-emoji.pop { animation: emojiPop 0.45s cubic-bezier(0.34,1.56,0.64,1); }
+    @keyframes emojiPop {
+      0% { transform: scale(0.3) rotate(-15deg); opacity: 0; }
+      100% { transform: scale(1) rotate(0deg); opacity: 1; }
+    }
+    .output-name {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.8rem;
+      color: var(--text);
+      letter-spacing: -0.02em;
+      transition: opacity 0.25s;
+    }
+    .output-placeholder {
+      font-size: 1rem;
+      color: var(--text-muted);
+      font-style: italic;
+    }
+    .output-cat-tag {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: var(--accent-glow);
+      border: 1px solid var(--border2);
+      color: var(--g5);
+      padding: 3px 12px;
+      border-radius: 50px;
+    }
+    [data-theme="dark"] .output-cat-tag { color: var(--g8); }
+
+    .tool-controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    @media (max-width: 520px) { .tool-controls { grid-template-columns: 1fr; } }
+
+    .select-wrap {
+      position: relative;
+    }
+    .select-wrap select {
+      width: 100%;
+      appearance: none;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 36px 10px 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      color: var(--text);
+      cursor: pointer;
+      transition: border-color var(--transition), background var(--transition);
+    }
+    .select-wrap select:focus { outline: 2px solid var(--accent); border-color: var(--accent); }
+    .select-wrap::after {
+      content: '▾';
+      position: absolute;
+      right: 12px;
+      top: 50%; transform: translateY(-50%);
+      color: var(--text-muted);
+      pointer-events: none;
+      font-size: 0.85rem;
+    }
+
+    .checkbox-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      color: var(--text2);
+      user-select: none;
+      transition: border-color var(--transition), background var(--transition);
+    }
+    .checkbox-wrap:hover { border-color: var(--accent); }
+    .checkbox-wrap input[type="checkbox"] {
+      accent-color: var(--accent);
+      width: 16px; height: 16px; cursor: pointer;
+    }
+
+    .btn-generate {
+      width: 100%;
+      background: linear-gradient(135deg, var(--g4), var(--accent));
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 16px 24px;
+      font-family: 'Syne', sans-serif;
+      font-size: 1rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.15s, box-shadow 0.2s;
+      box-shadow: 0 4px 20px var(--accent-glow);
+      margin-bottom: 20px;
+    }
+    .btn-generate::before {
+      content: '';
+      position: absolute;
+      top: -100%; left: -100%;
+      width: 300%; height: 300%;
+      background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 60%);
+      transition: all 0.5s;
+      opacity: 0;
+    }
+    .btn-generate:hover { transform: translateY(-2px); box-shadow: 0 8px 32px var(--accent-glow); }
+    .btn-generate:hover::before { opacity: 1; top: -50%; left: -50%; }
+    .btn-generate:active { transform: translateY(0); }
+
+    /* History */
+    .history-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .history-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    .btn-clear {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      border-radius: 8px;
+      padding: 4px 12px;
+      font-size: 0.78rem;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      transition: border-color var(--transition), color var(--transition);
+    }
+    .btn-clear:hover { border-color: #e07070; color: #e07070; }
+    .history-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      min-height: 36px;
+    }
+    .history-item {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 50px;
+      padding: 5px 14px;
+      font-size: 0.85rem;
+      color: var(--text2);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      animation: fadeIn 0.25s ease;
+      transition: background var(--transition), border-color var(--transition);
+    }
+    .history-item:hover { border-color: var(--accent); background: var(--accent-glow); }
+    @keyframes fadeIn { from { opacity: 0; transform: scale(0.85); } to { opacity: 1; transform: scale(1); } }
+    .history-empty { color: var(--text-muted); font-style: italic; font-size: 0.88rem; }
+
+    /* ===================== SECTION CARDS ===================== */
+    .section-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 36px 36px 32px;
+      margin-bottom: 28px;
+      box-shadow: 0 4px 20px var(--shadow);
+      transition: background var(--transition), border-color var(--transition), box-shadow var(--transition);
+    }
+    .section-card:hover {
+      box-shadow: 0 8px 36px var(--shadow2);
+      border-color: var(--border2);
+    }
+    .section-card h2 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.65rem;
+      color: var(--text);
+      letter-spacing: -0.02em;
+      margin-bottom: 14px;
+      line-height: 1.25;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-card h2 .section-icon {
+      font-size: 1.2rem;
+      opacity: 0.8;
+    }
+    .section-card h3 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text2);
+      margin: 22px 0 10px;
+    }
+    .section-card p {
+      color: var(--text3);
+      margin-bottom: 14px;
+      line-height: 1.75;
+    }
+    .section-card p:last-child { margin-bottom: 0; }
+
+    /* Section divider */
+    .section-sep {
+      border: none;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
+      margin: 28px 0;
+    }
+
+    /* Feature snippet / highlight box */
+    .snippet {
+      background: linear-gradient(135deg, var(--accent-glow2), var(--bg2));
+      border: 1.5px solid var(--border2);
+      border-left: 4px solid var(--accent);
+      border-radius: var(--radius-sm);
+      padding: 18px 20px;
+      margin: 18px 0;
+      color: var(--text2);
+      font-size: 0.95rem;
+      line-height: 1.7;
+    }
+
+    /* Emoji table */
+    .emoji-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.92rem;
+      margin: 16px 0;
+    }
+    .emoji-table th {
+      background: var(--surface2);
+      font-family: 'Syne', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      padding: 10px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    .emoji-table td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text3);
+      transition: background var(--transition);
+    }
+    .emoji-table tr:hover td { background: var(--surface2); }
+    .emoji-table td:last-child { font-size: 1.5rem; }
+
+    /* Code block */
+    pre {
+      background: var(--g1);
+      border: 1px solid var(--g3);
+      border-radius: var(--radius-sm);
+      padding: 20px;
+      overflow-x: auto;
+      margin: 16px 0;
+    }
+    code {
+      font-family: 'Courier New', monospace;
+      font-size: 0.84rem;
+      color: var(--g8);
+      line-height: 1.6;
+    }
+
+    /* Category chips */
+    .cat-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 12px 0;
+    }
+    .cat-chip {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 50px;
+      padding: 6px 16px;
+      font-size: 0.86rem;
+      color: var(--text2);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all var(--transition);
+    }
+    .cat-chip:hover { border-color: var(--accent); background: var(--accent-glow); }
+
+    /* ===================== FAQ ACCORDION ===================== */
+    .faq-item {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      margin-bottom: 10px;
+      transition: border-color var(--transition);
+    }
+    .faq-item:hover { border-color: var(--border2); }
+    .faq-q {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 18px 20px;
+      cursor: pointer;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--text);
+      background: var(--surface2);
+      transition: background var(--transition), color var(--transition);
+      gap: 12px;
+      user-select: none;
+    }
+    .faq-q:hover { background: var(--accent-glow); color: var(--accent); }
+    .faq-q .faq-arrow {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      transition: transform 0.3s, color 0.2s;
+      flex-shrink: 0;
+    }
+    .faq-item.open .faq-q { background: var(--accent-glow); color: var(--text); }
+    .faq-item.open .faq-arrow { transform: rotate(180deg); color: var(--accent); }
+    .faq-a {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s cubic-bezier(0.4,0,0.2,1), padding 0.3s;
+      background: var(--surface);
+    }
+    .faq-item.open .faq-a { max-height: 300px; }
+    .faq-a-inner {
+      padding: 18px 20px;
+      color: var(--text3);
+      font-size: 0.93rem;
+      line-height: 1.75;
+    }
+
+    /* ===================== FOOTER ===================== */
+    footer {
+      text-align: center;
+      padding: 32px 24px 40px;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      position: relative;
+      z-index: 1;
+    }
+    footer strong { color: var(--accent); font-family: 'DM Serif Display', serif; font-size: 1rem; }
+
+    /* ===================== RESPONSIVE ===================== */
+    @media (max-width: 600px) {
+      main { padding: 24px 16px 60px; }
+      .tool-card, .section-card { padding: 24px 20px; }
+      .section-card h2 { font-size: 1.35rem; }
+    }
+
+    /* ===================== SCROLL FADE IN ===================== */
+    .reveal {
+      opacity: 0;
+      transform: translateY(22px);
+      transition: opacity 0.55s ease, transform 0.55s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- ===================== NAV ===================== -->
+<nav aria-label="Main navigation">
+  <div class="nav-inner">
+    <div class="nav-logo">🌿 EmojiDrop</div>
+    <a class="nav-link" href="#generator">Generator</a>
+    <a class="nav-link" href="#how-it-works">How It Works</a>
+    <a class="nav-link" href="#benefits">Benefits</a>
+    <a class="nav-link" href="#build">Build It</a>
+    <a class="nav-link" href="#faq">FAQ</a>
+    <div class="nav-spacer"></div>
+    <button class="dark-toggle" id="darkToggle" aria-label="Toggle dark mode">
+      <span class="icon" id="darkIcon">🌙</span>
+      <span id="darkLabel">Dark</span>
+    </button>
+  </div>
+</nav>
+
+<!-- ===================== MAIN ===================== -->
+<main>
+
+  <!-- Hero -->
+  <section class="hero reveal">
+    <div class="hero-badge">✦ Free SaaS Tool</div>
+    <h1>Random Object &<br><em>Emoji Generator</em></h1>
+    <p class="hero-sub">Instant creative prompts for games, classrooms, art, and idea generation — one click, endless possibilities.</p>
+  </section>
+
+  <!-- ===================== GENERATOR TOOL ===================== -->
+  <section id="generator" aria-label="Random Object Generator Tool">
+    <div class="tool-card reveal">
+
+      <!-- Output Display -->
+      <div class="tool-output" id="toolOutput" role="status" aria-live="polite">
+        <span class="output-placeholder" id="outputPlaceholder">Click "Generate Object" to begin ✨</span>
+        <span class="output-emoji" id="outputEmoji" style="display:none"></span>
+        <span class="output-name" id="outputName" style="display:none"></span>
+        <span class="output-cat-tag" id="outputCat" style="display:none"></span>
+      </div>
+
+      <!-- Controls Row -->
+      <div class="tool-controls">
+        <!-- Category dropdown -->
+        <div class="select-wrap">
+          <select id="categorySelect" aria-label="Select object category">
+            <option value="all">🌍 All Categories</option>
+            <option value="household">🏠 Household</option>
+            <option value="school">🎒 School</option>
+            <option value="food">🍕 Food</option>
+            <option value="animal">🐾 Animals</option>
+            <option value="outdoor">🌳 Outdoor</option>
+            <option value="tool">🔧 Tools</option>
+          </select>
+        </div>
+        <!-- No repeat checkbox -->
+        <label class="checkbox-wrap" for="noRepeat">
+          <input type="checkbox" id="noRepeat" />
+          🚫 No Repeat
+        </label>
+      </div>
+
+      <!-- Generate button -->
+      <button class="btn-generate" id="generateBtn" aria-label="Generate a random object">
+        ⚡ Generate Object
+      </button>
+
+      <!-- History -->
+      <div class="history-header">
+        <span class="history-title">🕓 Last 10 Generated</span>
+        <button class="btn-clear" id="clearHistory" aria-label="Clear history">Clear</button>
+      </div>
+      <div class="history-list" id="historyList" role="list" aria-label="Generated object history">
+        <span class="history-empty" id="historyEmpty">No history yet.</span>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ===================== WHAT IS IT ===================== -->
+  <section class="section-card reveal" id="what-is-it">
+    <h2><span class="section-icon">🔍</span> What Is a Random Object Generator?</h2>
+    <p>A <a href="https://randomobjectgenerator.io/" target="_blank">random object name generator</a> is a digital tool that selects an object from a stored database and pairs it with a related emoji using a random number algorithm. It is free, easy to use, and helpful for games, learning, art, and idea creation.</p>
+    <p>This type of generator often uses a programmed list of object names such as "book," "apple," or "chair." Then it connects each object to a Unicode emoji like 📘, 🍎, or 🪑. When you press the generate button, the system runs a random selection process and shows one result instantly.</p>
+    <div class="snippet">
+      💡 <strong>Quick fact:</strong> Because the tool works in real time, you get a new output on every click. Students, teachers, artists, and game players use it daily for quick prompts and creative tasks.
+    </div>
+  </section>
+
+  <!-- ===================== HOW IT WORKS ===================== -->
+  <section class="section-card reveal" id="how-it-works">
+    <h2><span class="section-icon">⚙️</span> How Does It Work?</h2>
+    <p>A random object name and emoji generator works by using a predefined object list and a random number function to select and display one item with a matching emoji.</p>
+    <p>First, the system stores object names inside an array or database. These objects can include school items like pencil, eraser, and notebook, household items like table and lamp, or food items like banana and pizza.</p>
+
+    <h3>Object–Emoji Mapping Example</h3>
+    <table class="emoji-table" aria-label="Sample object to emoji mapping">
+      <thead>
+        <tr><th>Object Name</th><th>Emoji</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Apple</td><td>🍎</td></tr>
+        <tr><td>Book</td><td>📘</td></tr>
+        <tr><td>Car</td><td>🚗</td></tr>
+        <tr><td>Dog</td><td>🐶</td></tr>
+        <tr><td>Chair</td><td>🪑</td></tr>
+      </tbody>
+    </table>
+
+    <p>Next, the generator uses a random number generator — often built with JavaScript's <code>Math.random()</code> or Python's <code>random.randint()</code>. The program selects an index number from the object list, retrieves the object at that index, and displays both the name and emoji on screen.</p>
+
+    <hr class="section-sep" />
+
+    <h3>Why Is the Output Truly Random?</h3>
+    <p>The output is random because the tool uses a mathematical pseudo-random function. If the dataset contains 200 objects, the random function selects a number between 0 and 199. As a result, every object has the same selection chance — fair and unpredictable.</p>
+
+    <h3>What Data Source Does the Generator Use?</h3>
+    <p>The generator uses a fixed internal dataset of object names and mapped emoji codes. Developers create the dataset manually and may include 100, 500, or even 1,000 object entries. Because the dataset stays stored locally in the browser or on the server, the tool does not need internet access after loading.</p>
+  </section>
+
+  <!-- ===================== BENEFITS ===================== -->
+  <section class="section-card reveal" id="benefits">
+    <h2><span class="section-icon">🌟</span> Why Use It?</h2>
+    <p>You should use a random object name and emoji generator because it supports idea creation, learning exercises, and game development in equal measure.</p>
+
+    <h3>🎨 For Creative Writing</h3>
+    <p>Teachers often ask students to write a short story using three random objects. When the tool gives "balloon 🎈," "clock ⏰," and "spoon 🥄," students must connect them into one story — sparking genuine creativity.</p>
+
+    <h3>✏️ For Drawing Practice</h3>
+    <p>Artists use random prompts to sketch objects they normally would not choose. Therefore, it builds skill and flexibility, pushing artists beyond their comfort zone.</p>
+
+    <h3>🎮 For Classroom Games</h3>
+    <p>Since the tool selects randomly, players cannot predict the next object. Therefore, gameplay remains balanced and exciting. Use cases include charades prompts, guess-the-object games, drawing competitions, and word association rounds.</p>
+
+    <h3>📚 For Learning Skills</h3>
+    <p>Students can use it to practice spelling, create sentences, group objects by category, and identify object functions. Because repetition supports memory, clicking the generator multiple times exposes learners to many objects — vocabulary grows naturally.</p>
+  </section>
+
+  <!-- ===================== FEATURES ===================== -->
+  <section class="section-card reveal" id="features">
+    <h2><span class="section-icon">✨</span> Features of a Good Generator</h2>
+    <p>A good random object and emoji generator includes a large dataset, a clean interface, fast response time, and category filters.</p>
+
+    <div class="snippet">
+      📊 <strong>Dataset size matters:</strong> A tool with 20 objects becomes repetitive quickly. However, a tool with 300 or more objects provides the variety needed for sustained engagement.
+    </div>
+
+    <h3>Category Filters</h3>
+    <p>With category filters, users can generate specific object types, making the tool far more flexible for targeted tasks.</p>
+
+    <div class="cat-chips" aria-label="Available categories">
+      <div class="cat-chip">🐾 Animals — dog, cat, horse</div>
+      <div class="cat-chip">🍎 Food — apple, bread, rice</div>
+      <div class="cat-chip">🔧 Tools — hammer, wrench, drill</div>
+      <div class="cat-chip">🎒 School — pen, ruler, bag</div>
+      <div class="cat-chip">🏠 Household — lamp, table, mirror</div>
+      <div class="cat-chip">🌳 Outdoor — rock, tree, bench</div>
+    </div>
+
+    <h3>Mobile Compatibility</h3>
+    <p>Mobile compatibility is important because many users access tools through smartphones. The layout should adjust automatically to small screens with large tappable buttons and full Unicode emoji support across devices.</p>
+  </section>
+
+  <!-- ===================== BUILD IT ===================== -->
+  <section class="section-card reveal" id="build">
+    <h2><span class="section-icon">🛠️</span> How to Build It</h2>
+    <p>You can build a <a href="https://randomobjectgen.onrender.com/" target="_blank">random object</a> name and emoji generator using basic web technologies like HTML, CSS, and JavaScript — no frameworks required.</p>
+
+    <h3>Step 1: Define the Data Array</h3>
+    <pre><code>const objects = [
+  { name: "Apple", emoji: "🍎" },
+  { name: "Book",  emoji: "📘" },
+  { name: "Car",   emoji: "🚗" }
+];</code></pre>
+
+    <h3>Step 2: Write the Generate Function</h3>
+    <pre><code>function generateObject() {
+  const randomIndex = Math.floor(
+    Math.random() * objects.length
+  );
+  const selected = objects[randomIndex];
+  document.getElementById("output").innerText =
+    selected.name + " " + selected.emoji;
+}</code></pre>
+
+    <p>Because the logic stays simple, beginners can build this project in less than 50 lines of code. Connect the button click event to the function and you're done. No coding knowledge? Many online generator platforms let you create custom lists without writing a single line.</p>
+  </section>
+
+  <!-- ===================== FAQ ===================== -->
+  <section class="section-card reveal" id="faq">
+    <h2><span class="section-icon">❓</span> Frequently Asked Questions</h2>
+
+    <div class="faq-item" role="region">
+      <div class="faq-q" role="button" tabindex="0" aria-expanded="false">
+        What is a random object name and emoji generator?
+        <span class="faq-arrow">▾</span>
+      </div>
+      <div class="faq-a"><div class="faq-a-inner">A random object name and emoji generator is a digital tool that selects one object from a stored list and displays it with a related Unicode emoji. It uses a random number function to ensure fair selection. Because it works instantly, users can generate unlimited results with repeated clicks. Teachers, students, game players, and artists often use it for prompts, vocabulary tasks, and drawing exercises.</div></div>
+    </div>
+
+    <div class="faq-item" role="region">
+      <div class="faq-q" role="button" tabindex="0" aria-expanded="false">
+        Is the output truly random?
+        <span class="faq-arrow">▾</span>
+      </div>
+      <div class="faq-a"><div class="faq-a-inner">The output is pseudo-random, which means it uses a mathematical algorithm to simulate randomness. Most tools rely on functions such as Math.random() in JavaScript. These functions generate unpredictable numbers within a defined range. Because each object has equal probability in the list, the selection remains fair. For everyday use like games or classroom tasks, the randomness is sufficient and balanced.</div></div>
+    </div>
+
+    <div class="faq-item" role="region">
+      <div class="faq-q" role="button" tabindex="0" aria-expanded="false">
+        Can I use the generator for classroom activities?
+        <span class="faq-arrow">▾</span>
+      </div>
+      <div class="faq-a"><div class="faq-a-inner">Yes! Teachers often project the generated object on a screen and ask students to create sentences or short paragraphs. Because the tool provides quick prompts, it saves preparation time. The emoji helps younger students recognize the object visually. The generator supports active learning since each new click provides a fresh object to discuss or write about.</div></div>
+    </div>
+
+    <div class="faq-item" role="region">
+      <div class="faq-q" role="button" tabindex="0" aria-expanded="false">
+        How many objects should a good generator include?
+        <span class="faq-arrow">▾</span>
+      </div>
+      <div class="faq-a"><div class="faq-a-inner">A good generator should include at least 200 to 500 objects for variety. With fewer than 50 items, repetition becomes frequent. Larger datasets reduce repeated results during short sessions. Developers often group objects into categories like animals, tools, and food items. Proper coding ensures smooth operation regardless of dataset size.</div></div>
+    </div>
+
+  </section>
+
+</main>
+
+<!-- ===================== FOOTER ===================== -->
+<footer>
+  <p><strong>EmojiDrop</strong> — A free random object &amp; emoji generator tool.<br>
+  Built with ♥ using HTML, CSS &amp; JavaScript. No frameworks. No tracking.</p>
+</footer>
+
+<!-- ===================== JAVASCRIPT ===================== -->
+<script>
+  /* ===================== DARK MODE ===================== */
+  const darkToggle = document.getElementById('darkToggle');
+  const darkIcon = document.getElementById('darkIcon');
+  const darkLabel = document.getElementById('darkLabel');
+
+  function applyTheme(dark) {
+    document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+    darkIcon.textContent = dark ? '☀️' : '🌙';
+    darkLabel.textContent = dark ? 'Light' : 'Dark';
+  }
+
+  const savedTheme = localStorage.getItem('emojidrop-theme');
+  applyTheme(savedTheme === 'dark');
+
+  darkToggle.addEventListener('click', () => {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    applyTheme(!isDark);
+    localStorage.setItem('emojidrop-theme', !isDark ? 'dark' : 'light');
+  });
+
+  /* ===================== OBJECT DATASET ===================== */
+  const OBJECTS = [
+    // Household
+    { name: "Chair", emoji: "🪑", cat: "household" },
+    { name: "Table", emoji: "🪞", cat: "household" },
+    { name: "Lamp", emoji: "💡", cat: "household" },
+    { name: "Clock", emoji: "🕰️", cat: "household" },
+    { name: "Mirror", emoji: "🪞", cat: "household" },
+    { name: "Sofa", emoji: "🛋️", cat: "household" },
+    { name: "Bed", emoji: "🛏️", cat: "household" },
+    { name: "Pillow", emoji: "🪡", cat: "household" },
+    { name: "Blanket", emoji: "🧣", cat: "household" },
+    { name: "Curtain", emoji: "🪟", cat: "household" },
+    { name: "Broom", emoji: "🧹", cat: "household" },
+    { name: "Bucket", emoji: "🪣", cat: "household" },
+    { name: "Trash Can", emoji: "🗑️", cat: "household" },
+    { name: "Mop", emoji: "🧽", cat: "household" },
+    { name: "Basket", emoji: "🧺", cat: "household" },
+    { name: "Bottle", emoji: "🍶", cat: "household" },
+    { name: "Cup", emoji: "☕", cat: "household" },
+    { name: "Plate", emoji: "🍽️", cat: "household" },
+    { name: "Fork", emoji: "🍴", cat: "household" },
+    { name: "Spoon", emoji: "🥄", cat: "household" },
+    { name: "Knife", emoji: "🔪", cat: "household" },
+    { name: "Pot", emoji: "🫕", cat: "household" },
+    { name: "Pan", emoji: "🍳", cat: "household" },
+    { name: "Kettle", emoji: "🫖", cat: "household" },
+    { name: "Towel", emoji: "🛁", cat: "household" },
+    // School
+    { name: "Pencil", emoji: "✏️", cat: "school" },
+    { name: "Eraser", emoji: "🧹", cat: "school" },
+    { name: "Notebook", emoji: "📓", cat: "school" },
+    { name: "Book", emoji: "📘", cat: "school" },
+    { name: "Ruler", emoji: "📏", cat: "school" },
+    { name: "Compass", emoji: "🧭", cat: "school" },
+    { name: "Backpack", emoji: "🎒", cat: "school" },
+    { name: "Scissors", emoji: "✂️", cat: "school" },
+    { name: "Glue", emoji: "🧴", cat: "school" },
+    { name: "Calculator", emoji: "🔢", cat: "school" },
+    { name: "Marker", emoji: "🖊️", cat: "school" },
+    { name: "Pen", emoji: "🖋️", cat: "school" },
+    { name: "Crayons", emoji: "🖍️", cat: "school" },
+    { name: "Globe", emoji: "🌍", cat: "school" },
+    { name: "Microscope", emoji: "🔬", cat: "school" },
+    { name: "Magnifier", emoji: "🔍", cat: "school" },
+    { name: "Stapler", emoji: "📎", cat: "school" },
+    { name: "Folder", emoji: "📁", cat: "school" },
+    { name: "Tape", emoji: "📼", cat: "school" },
+    { name: "Whiteboard", emoji: "📋", cat: "school" },
+    // Food
+    { name: "Apple", emoji: "🍎", cat: "food" },
+    { name: "Banana", emoji: "🍌", cat: "food" },
+    { name: "Pizza", emoji: "🍕", cat: "food" },
+    { name: "Burger", emoji: "🍔", cat: "food" },
+    { name: "Bread", emoji: "🍞", cat: "food" },
+    { name: "Egg", emoji: "🥚", cat: "food" },
+    { name: "Cheese", emoji: "🧀", cat: "food" },
+    { name: "Carrot", emoji: "🥕", cat: "food" },
+    { name: "Corn", emoji: "🌽", cat: "food" },
+    { name: "Broccoli", emoji: "🥦", cat: "food" },
+    { name: "Strawberry", emoji: "🍓", cat: "food" },
+    { name: "Grapes", emoji: "🍇", cat: "food" },
+    { name: "Watermelon", emoji: "🍉", cat: "food" },
+    { name: "Lemon", emoji: "🍋", cat: "food" },
+    { name: "Peach", emoji: "🍑", cat: "food" },
+    { name: "Cherry", emoji: "🍒", cat: "food" },
+    { name: "Pineapple", emoji: "🍍", cat: "food" },
+    { name: "Mango", emoji: "🥭", cat: "food" },
+    { name: "Avocado", emoji: "🥑", cat: "food" },
+    { name: "Mushroom", emoji: "🍄", cat: "food" },
+    { name: "Spaghetti", emoji: "🍝", cat: "food" },
+    { name: "Sushi", emoji: "🍣", cat: "food" },
+    { name: "Taco", emoji: "🌮", cat: "food" },
+    { name: "Ice Cream", emoji: "🍦", cat: "food" },
+    { name: "Cake", emoji: "🎂", cat: "food" },
+    // Animal
+    { name: "Dog", emoji: "🐶", cat: "animal" },
+    { name: "Cat", emoji: "🐱", cat: "animal" },
+    { name: "Horse", emoji: "🐴", cat: "animal" },
+    { name: "Cow", emoji: "🐮", cat: "animal" },
+    { name: "Pig", emoji: "🐷", cat: "animal" },
+    { name: "Sheep", emoji: "🐑", cat: "animal" },
+    { name: "Chicken", emoji: "🐔", cat: "animal" },
+    { name: "Duck", emoji: "🦆", cat: "animal" },
+    { name: "Rabbit", emoji: "🐰", cat: "animal" },
+    { name: "Fox", emoji: "🦊", cat: "animal" },
+    { name: "Bear", emoji: "🐻", cat: "animal" },
+    { name: "Panda", emoji: "🐼", cat: "animal" },
+    { name: "Lion", emoji: "🦁", cat: "animal" },
+    { name: "Tiger", emoji: "🐯", cat: "animal" },
+    { name: "Elephant", emoji: "🐘", cat: "animal" },
+    { name: "Giraffe", emoji: "🦒", cat: "animal" },
+    { name: "Zebra", emoji: "🦓", cat: "animal" },
+    { name: "Penguin", emoji: "🐧", cat: "animal" },
+    { name: "Owl", emoji: "🦉", cat: "animal" },
+    { name: "Parrot", emoji: "🦜", cat: "animal" },
+    { name: "Dolphin", emoji: "🐬", cat: "animal" },
+    { name: "Shark", emoji: "🦈", cat: "animal" },
+    { name: "Turtle", emoji: "🐢", cat: "animal" },
+    { name: "Frog", emoji: "🐸", cat: "animal" },
+    { name: "Snail", emoji: "🐌", cat: "animal" },
+    // Outdoor
+    { name: "Tree", emoji: "🌳", cat: "outdoor" },
+    { name: "Flower", emoji: "🌸", cat: "outdoor" },
+    { name: "Rock", emoji: "🪨", cat: "outdoor" },
+    { name: "Bench", emoji: "🛋️", cat: "outdoor" },
+    { name: "Tent", emoji: "⛺", cat: "outdoor" },
+    { name: "Bicycle", emoji: "🚲", cat: "outdoor" },
+    { name: "Kite", emoji: "🪁", cat: "outdoor" },
+    { name: "Umbrella", emoji: "☂️", cat: "outdoor" },
+    { name: "Canoe", emoji: "🛶", cat: "outdoor" },
+    { name: "Lantern", emoji: "🪔", cat: "outdoor" },
+    { name: "Campfire", emoji: "🔥", cat: "outdoor" },
+    { name: "Shovel", emoji: "⛏️", cat: "outdoor" },
+    { name: "Watering Can", emoji: "🌿", cat: "outdoor" },
+    { name: "Sunflower", emoji: "🌻", cat: "outdoor" },
+    { name: "Cactus", emoji: "🌵", cat: "outdoor" },
+    { name: "Mushroom", emoji: "🍄", cat: "outdoor" },
+    { name: "Leaf", emoji: "🍃", cat: "outdoor" },
+    { name: "Acorn", emoji: "🌰", cat: "outdoor" },
+    { name: "Snowman", emoji: "⛄", cat: "outdoor" },
+    { name: "Rainbow", emoji: "🌈", cat: "outdoor" },
+    // Tool
+    { name: "Hammer", emoji: "🔨", cat: "tool" },
+    { name: "Wrench", emoji: "🔧", cat: "tool" },
+    { name: "Screwdriver", emoji: "🪛", cat: "tool" },
+    { name: "Drill", emoji: "⚙️", cat: "tool" },
+    { name: "Saw", emoji: "🪚", cat: "tool" },
+    { name: "Toolbox", emoji: "🧰", cat: "tool" },
+    { name: "Pliers", emoji: "🔩", cat: "tool" },
+    { name: "Level", emoji: "📐", cat: "tool" },
+    { name: "Tape Measure", emoji: "📏", cat: "tool" },
+    { name: "Ladder", emoji: "🪜", cat: "tool" },
+    { name: "Flashlight", emoji: "🔦", cat: "tool" },
+    { name: "Paint Brush", emoji: "🖌️", cat: "tool" },
+    { name: "Roller", emoji: "🎨", cat: "tool" },
+    { name: "Rope", emoji: "🧵", cat: "tool" },
+    { name: "Chain", emoji: "⛓️", cat: "tool" },
+    { name: "Magnet", emoji: "🧲", cat: "tool" },
+    { name: "Battery", emoji: "🔋", cat: "tool" },
+    { name: "Plug", emoji: "🔌", cat: "tool" },
+    { name: "Bolt", emoji: "⚡", cat: "tool" },
+    { name: "Key", emoji: "🗝️", cat: "tool" },
+  ];
+
+  /* ===================== GENERATOR LOGIC ===================== */
+  let history = [];
+  let usedIndexes = new Set();
+
+  const generateBtn = document.getElementById('generateBtn');
+  const categorySelect = document.getElementById('categorySelect');
+  const noRepeat = document.getElementById('noRepeat');
+  const toolOutput = document.getElementById('toolOutput');
+  const outputPlaceholder = document.getElementById('outputPlaceholder');
+  const outputEmoji = document.getElementById('outputEmoji');
+  const outputName = document.getElementById('outputName');
+  const outputCat = document.getElementById('outputCat');
+  const historyList = document.getElementById('historyList');
+  const historyEmpty = document.getElementById('historyEmpty');
+  const clearHistoryBtn = document.getElementById('clearHistory');
+
+  function getCategoryLabel(cat) {
+    const map = {
+      household: "🏠 Household",
+      school: "🎒 School",
+      food: "🍕 Food",
+      animal: "🐾 Animal",
+      outdoor: "🌳 Outdoor",
+      tool: "🔧 Tool",
+      all: "🌍 All"
+    };
+    return map[cat] || cat;
+  }
+
+  function generate() {
+    const cat = categorySelect.value;
+    let pool = cat === 'all' ? OBJECTS : OBJECTS.filter(o => o.cat === cat);
+
+    if (pool.length === 0) return;
+
+    let availablePool = pool;
+    if (noRepeat.checked) {
+      // Filter pool by category-specific used keys
+      const key = i => `${cat}:${i}`;
+      // Map pool to global OBJECTS indices
+      const availableGlobal = [];
+      OBJECTS.forEach((obj, i) => {
+        if ((cat === 'all' || obj.cat === cat) && !usedIndexes.has(i)) {
+          availableGlobal.push(i);
+        }
+      });
+
+      if (availableGlobal.length === 0) {
+        // reset used for this category
+        OBJECTS.forEach((obj, i) => {
+          if (cat === 'all' || obj.cat === cat) usedIndexes.delete(i);
+        });
+        availableGlobal.length = 0;
+        OBJECTS.forEach((obj, i) => {
+          if (cat === 'all' || obj.cat === cat) availableGlobal.push(i);
+        });
+      }
+
+      const randI = availableGlobal[Math.floor(Math.random() * availableGlobal.length)];
+      usedIndexes.add(randI);
+      showResult(OBJECTS[randI]);
+    } else {
+      const randI = Math.floor(Math.random() * pool.length);
+      showResult(pool[randI]);
+    }
+  }
+
+  function showResult(obj) {
+    // Hide placeholder, show result
+    outputPlaceholder.style.display = 'none';
+    outputEmoji.style.display = 'block';
+    outputName.style.display = 'block';
+    outputCat.style.display = 'inline-block';
+
+    outputEmoji.classList.remove('pop');
+    void outputEmoji.offsetWidth; // reflow for re-trigger
+    outputEmoji.classList.add('pop');
+
+    outputEmoji.textContent = obj.emoji;
+    outputName.textContent = obj.name;
+    outputCat.textContent = getCategoryLabel(obj.cat);
+
+    toolOutput.classList.add('glow');
+    setTimeout(() => toolOutput.classList.remove('glow'), 800);
+
+    addHistory(obj);
+  }
+
+  function addHistory(obj) {
+    history.unshift(obj);
+    if (history.length > 10) history.pop();
+    renderHistory();
+  }
+
+  function renderHistory() {
+    historyList.innerHTML = '';
+    if (history.length === 0) {
+      historyList.innerHTML = '<span class="history-empty" id="historyEmpty">No history yet.</span>';
+      return;
+    }
+    history.forEach(obj => {
+      const item = document.createElement('div');
+      item.className = 'history-item';
+      item.setAttribute('role', 'listitem');
+      item.innerHTML = `<span>${obj.emoji}</span><span>${obj.name}</span>`;
+      historyList.appendChild(item);
+    });
+  }
+
+  generateBtn.addEventListener('click', generate);
+
+  clearHistoryBtn.addEventListener('click', () => {
+    history = [];
+    usedIndexes.clear();
+    renderHistory();
+  });
+
+  // Enter key on generate btn
+  generateBtn.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') generate();
+  });
+
+  /* ===================== FAQ ACCORDION ===================== */
+  document.querySelectorAll('.faq-q').forEach(q => {
+    q.addEventListener('click', () => {
+      const item = q.closest('.faq-item');
+      const isOpen = item.classList.contains('open');
+      // Close all
+      document.querySelectorAll('.faq-item').forEach(i => {
+        i.classList.remove('open');
+        i.querySelector('.faq-q').setAttribute('aria-expanded', 'false');
+      });
+      if (!isOpen) {
+        item.classList.add('open');
+        q.setAttribute('aria-expanded', 'true');
+      }
+    });
+    q.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); q.click(); }
+    });
+  });
+
+  /* ===================== SCROLL REVEAL ===================== */
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.08 });
+  reveals.forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
